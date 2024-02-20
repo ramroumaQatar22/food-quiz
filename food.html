@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Trivia Quiz</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0; /* Background color for the entire page */
+}
+h1 {
+    color:#1f81bf;
+}
+#quiz-container {
+    margin: 0 auto;
+    max-width: 600px;
+    background-image: url('./Feature-img.png'); /* Replace 'your-image-url.jpg' with the URL of your background image */
+    background-size: cover; /* Cover the entire container with the background image */
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Prevent the background image from repeating */
+    border-radius: 90px; /* Rounded corners for the quiz container */
+    padding: 300px; /* Padding to give space between content and edges */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
+}
+#question {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle depth effect */
+    font-size: 1.4em;
+    margin-bottom: 20px;
+    color: red;
+}
+#options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+}
+#score {
+    font-size: 1.2em;
+    margin-top: 20px;
+    
+}
+
+#scoreboard {
+    color: firebrick;
+}
+h3{
+    color:red
+}
+</style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>Food Trivia Quiz</h1>
+        <input type="text" id="playerNameInput" placeholder="Enter your name">
+        <button id="startQuizButton">Start Quiz</button>
+        <div id="question" style="display:none;"></div>
+        <div id="options" style="display:none;"></div>
+        <div id="score" style="display:none;">Score: <span id="score-value">0</span></div>
+        <div id="scoreboard" style="display:none;">
+            <h2>Scoreboard</h2>
+            <ul id="score-list"></ul>
+        </div>
+    </div>
+    <h3> Each question has 10 points and you have 10 questions the more you answer right the more higher score you get good luck</h3>
+<script>
+const questions = [
+    {
+        question: "What is the main ingredient in guacamole?",
+        options: ["Avocado", "Tomato", "Onion", "Lemon"],
+        answer: "Avocado",
+        points: 10
+    },
+    {
+        question: "Which country is known for producing the most chocolate?",
+        options: ["Switzerland", "Belgium", "USA", "Germany"],
+        answer: "Belgium",
+        points: 10
+    },
+    {
+    question: "What is the primary ingredient in hummus?",
+        options: ["Chickpeas", "Lentils", "Black beans", "Kidney beans"],
+        answer: "Chickpeas",
+        points: 10
+    },
+    {
+        question: "Which of the following vegetables is a key ingredient in the traditional French dish ratatouille?",
+        options: ["Zucchini", "Eggplant", "Bell pepper", "All of the above"],
+        answer: "All of the above",
+        points: 10
+
+    },
+
+    {
+        question: "Which Lebanese dessert consists of layers of phyllo pastry filled with chopped nuts and sweetened with syrup or honey?",
+        options: ["Baklava", "Kunafa", "Halawet el-jibn", "Ma'amoul"],
+        answer: "Baklava",
+        points: 10
+
+    },
+
+    {
+        question: "What is the name of the Filipino dish made from a mixture of ground pork, vegetables, and spices, wrapped in a thin dough wrapper and deep-fried to a golden crisp?",
+        options: ["Lumpia", "Adobo", "Kare-Kare", "Sinigang"],
+        answer: "Lumpia",
+        points: 10
+
+    },
+
+    {
+        question: "What is the name of the popular Indonesian fried rice dish cooked with a variety of ingredients such as shallots, garlic, tamarind, chili, and sweet soy sauce, often topped with a fried egg?",
+        options: ["Nasi Goreng", "Rendang", "Satay", "Gado-gado"],
+        answer: "Nasi Goreng",
+        points: 10
+
+    },
+
+    {
+        question: "Which country is known for its famous dish kimchi, a traditional side dish made from fermented vegetables, typically napa cabbage and Korean radishes, seasoned with chili pepper, garlic, ginger, and other spices?",
+        options: ["China", "South Korea", "Japan", "Vietnam"],
+        answer: "South Korea",
+        points: 10
+
+    },
+    {
+        question: "What is the main ingredient in the Italian dish risotto?",
+        options: ["Pasta", "Rice", "Potatoes", "Bread"],
+        answer: "Rice",
+        points: 10
+
+    },
+   
+    {
+        question: "What is the national dish of Morocco, a savory stew made with meat (often lamb or chicken), vegetables, and a mix of spices, typically served with couscous?",
+        options: ["Falafel", "Shawarma", "Tagine", "Hummus"],
+        answer: "Tagine",
+        points: 10
+
+    }
+    // Add more questions here
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+let playerName;
+
+const playerNameInput = document.getElementById('playerNameInput');
+const startQuizButton = document.getElementById('startQuizButton');
+const questionElement = document.getElementById('question');
+const optionsElement = document.getElementById('options');
+const scoreElement = document.getElementById('score-value');
+
+startQuizButton.addEventListener('click', startQuiz);
+
+function startQuiz() {
+    playerName = playerNameInput.value;
+    playerNameInput.style.display = 'none';
+    startQuizButton.style.display = 'none';
+    questionElement.style.display = 'block';
+    optionsElement.style.display = 'flex';
+    scoreElement.style.display = 'block';
+    showQuestion();
+}
+
+function showQuestion() {
+    const currentQuestion = questions[currentQuestionIndex];
+    questionElement.textContent = currentQuestion.question;
+    optionsElement.innerHTML = '';
+    currentQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option, currentQuestion);
+        optionsElement.appendChild(button);
+    });
+}
+
+function checkAnswer(selectedOption, currentQuestion) {
+    if (selectedOption === currentQuestion.answer) {
+        score += currentQuestion.points;
+        scoreElement.textContent = score;
+    } else {
+        alert(`Wrong answer!`);
+    }
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion();
+    } else {
+        endQuiz();
+    }
+}
+
+function endQuiz() {
+    questionElement.textContent = 'Quiz Over!';
+    optionsElement.innerHTML = '';
+    scoreElement.style.display = 'none';
+}
+</script>
+<script>
+let scoreboard = [];
+
+    function updateScoreboard() {
+        const playerScore = {
+            name: playerName,
+            score: score
+        };
+        scoreboard.push(playerScore);
+        scoreboard.sort((a, b) => b.score - a.score);
+        const scoreList = document.getElementById('score-list');
+        scoreList.innerHTML = '';
+        scoreboard.forEach((player, index) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${index + 1}. ${player.name}: ${player.score}`;
+            scoreList.appendChild(listItem);
+        });
+    }
+
+    // Modify the endQuiz function to display the scoreboard
+    function endQuiz() {
+        questionElement.textContent = 'Quiz Over!';
+        optionsElement.innerHTML = '';
+        scoreElement.style.display = 'none';
+        document.getElementById('scoreboard').style.display = 'block';
+        updateScoreboard();
+    }
+</script>
+</body>
+</html>
